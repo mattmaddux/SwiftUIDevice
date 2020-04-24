@@ -16,6 +16,7 @@ Copy the following files to your project:
 - Device.swift
 - DeviceEnums.swift
 - OrientationExtensions.swift
+- WindowReader.swift
 
 
 ## Features
