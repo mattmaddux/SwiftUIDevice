@@ -3,7 +3,6 @@
 Filling in some of the missing pieces of SwiftUI's environment. Get easy info about which device is being used, the status of that device, and the window you're running in.
 
 ## Installation
-----------------------------------
 
 ### Swift Package Manager
 
@@ -20,7 +19,7 @@ Copy the following files to your project:
 
 
 ## Features
-----------------------------------
+
 - [x] Device Model
 - [x] Simulator Check
 - [x] Aspect Ratio
@@ -37,7 +36,6 @@ Other ideas please add an issue.
 
 
 ## Accessing Device Info
-----------------------------------
 
 ### Model
 
