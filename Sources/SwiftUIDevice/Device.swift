@@ -8,7 +8,6 @@ import Foundation
 import SwiftUI
 import CoreNFC
 
-
 public class Device: ObservableObject {
     
     // ======================================================= //
@@ -18,7 +17,7 @@ public class Device: ObservableObject {
     static public let shared: Device = Device()
     
     // ======================================================= //
-    // MARK: - Properties
+    // MARK: - Public Properties
     // ======================================================= //
     
     public let model: DeviceModel = DeviceModel.current
@@ -26,8 +25,6 @@ public class Device: ObservableObject {
     public let isSimulator: Bool = DeviceModel.isSimulator
     
     public let aspectRatio: AspectRatio = AspectRatio.calculated()
-    
-    public let nfcAvailable: Bool = NFCReaderSession.readingAvailable
     
     public var deviceOrientation: DeviceOrientation {
         return UIDevice.current.orientation
@@ -45,7 +42,15 @@ public class Device: ObservableObject {
         return aspectRatio == .iphoneLong || aspectRatio == .iphoneShort
     }
     
-    public var  windowClass: WindowClass {
+    public var nfcAvailable: Bool {
+        return NFCTagReaderSession.readingAvailable
+    }
+    
+    // ======================================================= //
+    // MARK: - Internal Properties
+    // ======================================================= //
+    
+    var  windowClass: WindowClass {
         let windowWidth = UIApplication.shared.windows[0].bounds.width
         if windowWidth < 650 {
             return .veryNarrow
@@ -58,15 +63,6 @@ public class Device: ObservableObject {
         }
     }
     
-    public var masterPanelWidth: CGFloat {
-        switch windowClass {
-            case .veryNarrow: return 0
-            case .narrow: return 320
-            case .wide: return 375
-            case .veryWide: return 414
-        }
-    }
-    
     // ======================================================= //
     // MARK: - Initializer
     // ======================================================= //
@@ -75,9 +71,6 @@ public class Device: ObservableObject {
         UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         NotificationCenter.default.addObserver(self, selector: #selector(update),
                                                name: Notification.Name("UIDeviceOrientationDidChangeNotification"),
-                                               object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(update),
-                                               name: Notification.Name("UIAccessibilityLayoutChangedNotification"),
                                                object: nil)
     }
     

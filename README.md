@@ -1,8 +1,6 @@
 # SwiftUIDevice
 
-Filling in some of the missing pieces of SwiftUI's environment. Get easy info about the device you're running on, the status of that device, and the window you're running in.
-
-Currently the live device info is limited to orientation and window size, but more info will be added over time.
+Filling in some of the missing pieces of SwiftUI's environment. Get easy info about which device is being used, the status of that device, and the window you're running in.
 
 ## Installation
 ----------------------------------
@@ -21,7 +19,24 @@ Copy the following files to your project:
 - OrientationExtensions.swift
 
 
-## Device Info
+## Features
+----------------------------------
+- [x] Device Model
+- [x] Simulator Check
+- [x] Aspect Ratio
+- [x] iPad & iPhone Check
+- [x] Device Orientation
+- [x] UI Orientation
+- [x] Window Size
+- [x] NFC Availability
+- [ ] Gyro
+- [ ] VPN Status
+
+Other ideas please add an issue.
+
+
+
+## Accessing Device Info
 ----------------------------------
 
 ### Model
@@ -37,7 +52,7 @@ struct ContentView: View {
     @ObservedObject var device = Device.shared
 
     var body: some View {
-        Text("Model: \(self.device.model)")
+    Text("Model: \(self.device.model.rawValue)")
     }
 }
 ```
@@ -120,7 +135,7 @@ struct ContentView: View {
 ```
 
 ### Check orientation
-##### (Updates your view as it changes.) 
+##### (Updates your view as it changes.)
 
 Easily update your SwiftUI views to respond to device rotation with two properties.
 
@@ -156,7 +171,7 @@ struct ContentView: View {
             }
             
             if device.uiOrientation == .portrait {
-                Text("^")
+                Text("ʌ")
                 Text("|")
                 Text("|")
                 Text("Front Camera")
@@ -180,6 +195,8 @@ struct ContentView: View {
 
 Size classes already give you basic information about the width of your window (and it's already available in the environment), but sometimes you might need more granular information for sizing. This split between devices is based on how Apple has chosen to render certain elements on different devices in different conditions (e.g. columns in master-detail nav views). Use it to make informed decisions about how to set manual widths.
 
+In order to keep updated with changes in the window size, this is implemented as a WindowReader view, used similarly to a GeometryReader (in fact it uses GeometryReader internally to respond to changes).
+
 WindowClass gives you four cases which break down like this:
 
 - Very Narrow (< 650 points)
@@ -202,84 +219,25 @@ import SwiftUI
 import SwiftUIDevice
 
 struct ContentView: View {
-
-    @ObservedObject var device = Device.shared
-    var buttonWidth: CGFloat {
-        switch device.windowClass {
-            case .veryNarrow: return 100
-            case .narrow: return 150
-            case .wide: return 175
-            case .veryWide: return 200
+    
+    var body: some View {
+        WindowReader { windowClass in
+            Text(self.text(forClass: windowClass))
         }
     }
-
-    var body: some View {
-        Rectangle()
-            .frame(width: buttonWidth)
-            .foregroundColor(Color.red)
+    
+    func text(forClass windowClass: WindowClass) -> String {
+        switch windowClass {
+            case .veryWide: return "<----- Lots o' room here ----->"
+            case .wide: return "<---- Still plenty ---->"
+            case .narrow: return "<-- Getting a little tight -->"
+            case .veryNarrow: return "<- Can't breathe ->"
+        }
     }
+    
 }
 ```
 
-### Master Panel Width
-##### (Updates your view as it changes.) 
-
-Use masterPanelWidth when you're building a master-detail-like interface, without using SwiftUI's Navigation View. It relies upon WindowClass to give you values for how wide your master panel should be, based upon the default behavior of Apple's NavigationView.
-
-Note: This will return 0 for a .veryNarrow WindowClass, as Apple does not use Master-Detail for those. Use your own judgement on when to show or not show two columns when using .narrow views.
-
-
-
-```swift
-import SwiftUI
-import SwiftUIDevice
-
-struct AdaptableSplitView: View {
-
-    @ObservedObject var device = Device.shared
-
-    var body: some View {
-        HStack(spacing: 0) {
-            if device.windowClass == .veryNarrow {
-                SingleView()
-            } else {
-                MasterView().frame(width: device.masterPanelWidth)
-                Divider()
-                DetailView()
-            }
-        }
-    }
-}
-
-struct SingleView: View {
-
-    var body: some View {
-        Text("Adapt to non-split view.")
-    }
-}
-
-struct MasterView: View {
-    var body: some View {
-        GeometryReader { geo in
-            VStack {
-                Text("Master").font(.headline)
-                Text("Width: \(geo.size.width)")
-            }
-        }
-    }
-}
-
-struct DetailView: View {
-    var body: some View {
-        GeometryReader { geo in
-            VStack {
-                Text("Detail").font(.headline)
-                Text("Width: \(geo.size.width)")
-            }
-        }
-    }
-}
-```
 
 ### Check NFC Availability
 
@@ -306,11 +264,3 @@ struct ContentView: View {
     }
 }
 ```
-
-
-## Planned Features
-----------------------------------
-- Gyro
-- VPN Status
-
-- Other ideas please add an issue.
